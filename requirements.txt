@@ -9,3 +9,5 @@ rich
 requests
 jinja2
 Pillow
+pytesseract
+easyocr

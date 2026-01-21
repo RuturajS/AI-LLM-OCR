@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +12,12 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
+
 <body>
     <div class="app-container">
+        <button class="toggle-sidebar-btn" onclick="toggleSidebar()" id="sidebarToggle">
+            <i class="fa-solid fa-bars"></i>
+        </button>
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="brand">
@@ -26,6 +31,9 @@
                 <!-- History Items will go here -->
             </div>
             <div class="sidebar-footer">
+                <button class="settings-btn" onclick="clearHistory()" style="color: #ff4444; margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-trash"></i> Clear History
+                </button>
                 <button class="settings-btn" onclick="toggleSettings()">
                     <i class="fa-solid fa-gear"></i> Settings
                 </button>
@@ -34,9 +42,15 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Settings Modal (Inline for simplicity or overlay) -->
+            <!-- Settings Modal -->
             <div class="settings-panel hidden" id="settingsPanel">
-                <h3>API Configuration</h3>
+                <div class="settings-header">
+                    <h3>Configuration</h3>
+                    <button onclick="toggleSettings()" class="close-settings-btn"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+
+                <h4>API Keys</h4>
                 <div class="form-group">
                     <label>OpenAI API Key</label>
                     <input type="password" id="openaiKey" placeholder="sk-...">
@@ -45,12 +59,38 @@
                     <label>Gemini API Key</label>
                     <input type="password" id="geminiKey" placeholder="AIza...">
                 </div>
-                <button onclick="saveSettings()" class="save-btn">Save Keys</button>
+                <div class="form-group">
+                    <label>OpenRouter API Key</label>
+                    <input type="password" id="openrouterKey" placeholder="sk-or-...">
+                </div>
+                <div class="form-group">
+                    <label>OpenRouter API Key</label>
+                    <input type="password" id="openrouterKey" placeholder="sk-or-...">
+                </div>
+
+                <h4>Advanced AI Parameters</h4>
+                <div class="form-group">
+                    <label>System Prompt</label>
+                    <textarea id="systemPrompt" placeholder="You are an AI assistant..."
+                        style="height: 60px;"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1">
+                        <label>Temperature (0.0 - 1.0)</label>
+                        <input type="number" id="temperature" placeholder="0.0" step="0.1" min="0" max="1" value="0.0">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>Max Tokens</label>
+                        <input type="number" id="maxTokens" placeholder="4096" value="4096">
+                    </div>
+                </div>
+
+                <button onclick="saveSettings()" class="save-btn">Save Settings</button>
             </div>
 
             <!-- Workspace -->
             <div class="workspace" id="workspace">
-                 <div class="upload-section" id="uploadSection">
+                <div class="upload-section" id="uploadSection">
                     <div class="dropzone" id="dropzone">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
                         <h3>Drag & Drop Image/PDF</h3>
@@ -64,18 +104,27 @@
                         <img id="imagePreview" src="" alt="Preview">
                         <div class="file-info" id="fileInfo"></div>
                     </div>
-                    
+
                     <div class="controls-container">
                         <div class="prompt-box">
                             <label>Instruction / Prompt</label>
-                            <textarea id="promptInput" placeholder="e.g. Extract only the total amount and date from this invoice."></textarea>
+                            <textarea id="promptInput"
+                                placeholder="e.g. Extract only the total amount and date from this invoice."></textarea>
                         </div>
-                        
+
                         <div class="options-row">
                             <select id="providerSelect">
                                 <option value="openai">OpenAI (GPT-4o)</option>
                                 <option value="gemini">Google Gemini (Flash)</option>
+                                <option value="openrouter">OpenRouter (Various)</option>
+                                <option value="tesseract">Tesseract (Local)</option>
+                                <option value="easyocr">EasyOCR (Python Local)</option>
                             </select>
+                        </div>
+                        <input type="text" id="customModelInput" class="custom-model-input"
+                            placeholder="Custom Model Name (optional, e.g. claude-3-opus)">
+
+                        <div class="options-row" style="margin-top: 1rem;">
                             <button class="extract-btn" onclick="processExtraction()" id="extractBtn">
                                 <i class="fa-solid fa-wand-magic-sparkles"></i> Extract Text
                             </button>
@@ -98,4 +147,5 @@
     </div>
     <script src="script.js"></script>
 </body>
+
 </html>

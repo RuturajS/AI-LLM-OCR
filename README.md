@@ -72,6 +72,22 @@ You can set API keys in the Web UI settings or via environment variables:
 
 - `OPENAI_API_KEY`
 - `GEMINI_API_KEY`
+- `OPENROUTER_API_KEY`
+
+- `OPENROUTER_API_KEY`
+
+### Local OCR Options (No API Key Required)
+
+#### 1. EasyOCR (Recommended for Local)
+Select "EasyOCR" in the dropdown. It runs entirely on your CPU/GPU using Python. **No extra installation needed** (dependency installed via requirements).
+
+#### 2. Tesseract
+To use Tesseract:
+1.  **Option A (System Install)**: Install it to a standard path like `C:\Program Files\Tesseract-OCR`.
+2.  **Option B (Portable/Custom)**: Set the `TESSERACT_PATH` environment variable in your `.env` file to point to your `tesseract.exe`.
+    ```bash
+    TESSERACT_PATH=C:\path\to\portable\tesseract.exe
+    ```
 
 ## Use Cases 💡
 
@@ -86,7 +102,7 @@ You can set API keys in the Web UI settings or via environment variables:
 
 ## Contributing 🤝
 
-We welcome contributions! Please follow these rules:
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) to get started.
 
 1. **Fork the repo** and create a concise branch name.
 2. **Code Style**: Ensure Python code is typed and formatted.

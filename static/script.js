@@ -19,7 +19,7 @@ let currentFile = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadSettings();
     loadHistory();
-    
+
     // Dropzone Events
     dropzone.addEventListener('click', () => fileInput.click());
     dropzone.addEventListener('dragover', (e) => {
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handleFile(e.dataTransfer.files[0]);
         }
     });
-    
+
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length) {
             handleFile(e.target.files[0]);
@@ -50,10 +50,10 @@ function handleFile(file) {
         alert('Please upload an image or PDF file.');
         return;
     }
-    
+
     currentFile = file;
     fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
-    
+
     if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -93,45 +93,95 @@ function toggleSettings() {
 function loadSettings() {
     const openai = localStorage.getItem('openai_key');
     const gemini = localStorage.getItem('gemini_key');
+    const openrouter = localStorage.getItem('openrouter_key');
     if (openai) document.getElementById('openaiKey').value = openai;
     if (gemini) document.getElementById('geminiKey').value = gemini;
+    if (openrouter) document.getElementById('openrouterKey').value = openrouter;
+
+    const sys = localStorage.getItem('system_prompt');
+    const temp = localStorage.getItem('temperature');
+    const tokens = localStorage.getItem('max_tokens');
+
+    if (sys) document.getElementById('systemPrompt').value = sys;
+    if (temp) document.getElementById('temperature').value = temp;
+    if (tokens) document.getElementById('maxTokens').value = tokens;
 }
 
 function saveSettings() {
     const openai = document.getElementById('openaiKey').value;
     const gemini = document.getElementById('geminiKey').value;
+    const openrouter = document.getElementById('openrouterKey').value;
+
+    const sys = document.getElementById('systemPrompt').value;
+    const temp = document.getElementById('temperature').value;
+    const tokens = document.getElementById('maxTokens').value;
+
     localStorage.setItem('openai_key', openai);
     localStorage.setItem('gemini_key', gemini);
+    localStorage.setItem('openrouter_key', openrouter);
+
+    localStorage.setItem('system_prompt', sys);
+    localStorage.setItem('temperature', temp);
+    localStorage.setItem('max_tokens', tokens);
     toggleSettings();
+}
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
+async function clearHistory() {
+    if (!confirm("Are you sure you want to clear all history?")) return;
+
+    try {
+        await fetch(`${API_URL}/history`, { method: 'DELETE' });
+        loadHistory();
+    } catch (e) {
+        alert("Failed to clear history");
+    }
 }
 
 async function processExtraction() {
     if (!currentFile) return;
-    
+
     const provider = document.getElementById('providerSelect').value;
     const prompt = promptInput.value || "Extract all text from this image.";
-    const key = provider === 'openai' ? 
-        localStorage.getItem('openai_key') : 
-        localStorage.getItem('gemini_key');
-        
+    let key = '';
+    if (provider === 'openai') key = document.getElementById('openaiKey').value;
+    else if (provider === 'gemini') key = document.getElementById('geminiKey').value;
+    else if (provider === 'openrouter') key = document.getElementById('openrouterKey').value;
+
     // Allow empty key if user relies on backend .env
-    
+
+    const customModel = document.getElementById('customModelInput').value;
+
+    // Get Advanced Params
+    const sys = document.getElementById('systemPrompt').value;
+    const temp = document.getElementById('temperature').value;
+    const tokens = document.getElementById('maxTokens').value;
+
     const formData = new FormData();
     formData.append('file', currentFile);
     formData.append('prompt', prompt);
     formData.append('provider', provider);
     if (key) formData.append('api_key', key);
-    
+    if (customModel) formData.append('model', customModel);
+
+    if (sys) formData.append('system_prompt', sys);
+    if (temp) formData.append('temperature', temp);
+    if (tokens) formData.append('max_tokens', tokens);
+
     setLoading(true);
-    
+
     try {
         const res = await fetch(`${API_URL}/extract`, {
             method: 'POST',
             body: formData
         });
-        
+
         const data = await res.json();
-        
+
         if (res.ok) {
             showResult(data.result);
             loadHistory(); // Refresh history
@@ -183,7 +233,7 @@ async function loadHistory() {
     try {
         const res = await fetch(`${API_URL}/history`);
         const history = await res.json();
-        
+
         historyList.innerHTML = '';
         history.forEach(item => {
             const div = document.createElement('div');
@@ -201,11 +251,14 @@ async function loadHistory() {
 }
 
 function loadHistoryItem(item) {
-    // We can't restore the file object to input, but we can show the result.
-    // Ideally we would support base64 preview or file serving.
-    // For now, let's just show the result and prompt.
     promptInput.value = item.prompt;
     showResult(item.result);
-    // Hide upload, show placeholder preview?
-    // Simply jumping to result is fine.
+
+    // If image exists, show it
+    if (item.image_path) {
+        document.getElementById('uploadSection').style.display = 'none';
+        previewSection.classList.remove('hidden');
+        imagePreview.src = item.image_path;
+        fileInfo.textContent = item.filename || "History Image";
+    }
 }
