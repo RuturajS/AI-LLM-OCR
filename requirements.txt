@@ -1,13 +1,6 @@
-fastapi
-uvicorn
-python-multipart
-openai
-google-genai
-python-dotenv
-typer
-rich
-requests
-jinja2
+# OCR Core Dependencies (Worker Only)
 Pillow
 pytesseract
 easyocr
+pdf2image
+numpy

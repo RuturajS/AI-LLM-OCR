@@ -9,6 +9,7 @@ const imagePreview = document.getElementById('imagePreview');
 const fileInfo = document.getElementById('fileInfo');
 const promptInput = document.getElementById('promptInput');
 const settingsPanel = document.getElementById('settingsPanel');
+const creditsPanel = document.getElementById('creditsPanel');
 const historyList = document.getElementById('historyList');
 const extractBtn = document.getElementById('extractBtn');
 const resultContent = document.getElementById('resultContent');
@@ -45,9 +46,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Toast System
+function showToast(message, type = 'info') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+
+    toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+
+    container.appendChild(toast);
+
+    // Remove after 3s
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 function handleFile(file) {
     if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
-        alert('Please upload an image or PDF file.');
+        showToast('Please upload an image or PDF file.', 'error');
         return;
     }
 
@@ -87,7 +116,13 @@ function resetApp() {
 }
 
 function toggleSettings() {
+    if (!creditsPanel.classList.contains('hidden')) creditsPanel.classList.add('hidden');
     settingsPanel.classList.toggle('hidden');
+}
+
+function toggleCredits() {
+    if (!settingsPanel.classList.contains('hidden')) settingsPanel.classList.add('hidden');
+    creditsPanel.classList.toggle('hidden');
 }
 
 function loadSettings() {
@@ -136,9 +171,12 @@ async function clearHistory() {
 
     try {
         await fetch(`${API_URL}/history`, { method: 'DELETE' });
+        // Force header update or just reload manually
+        historyList.innerHTML = '';
         loadHistory();
+        showToast("History cleared successfully", "success");
     } catch (e) {
-        alert("Failed to clear history");
+        showToast("Failed to clear history", "error");
     }
 }
 
@@ -216,7 +254,7 @@ function showResult(text) {
 function copyResult() {
     const text = resultContent.innerText;
     navigator.clipboard.writeText(text);
-    alert('Copied to clipboard!');
+    showToast('Copied to clipboard!', 'success');
 }
 
 function downloadResult() {
@@ -231,7 +269,8 @@ function downloadResult() {
 
 async function loadHistory() {
     try {
-        const res = await fetch(`${API_URL}/history`);
+        // Prevent cache
+        const res = await fetch(`${API_URL}/history?t=${new Date().getTime()}`);
         const history = await res.json();
 
         historyList.innerHTML = '';

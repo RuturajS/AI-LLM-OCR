@@ -122,28 +122,53 @@ class OCREngine:
             "X-Title": "AI-LLM-OCR"
         }
         
-        response = client.chat.completions.create(
-            model=model,
-            extra_headers=extra_headers,
-            temperature=temperature,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                extra_headers=extra_headers,
+                temperature=temperature,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                },
                             },
-                        },
+                        ],
+                    }
+                ],
+                max_tokens=max_tokens,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            error_msg = str(e).lower()
+            # If model does not support images (404/400)
+            if "image" in error_msg or "vision" in error_msg or "404" in error_msg:
+                print(f"Vision failed, falling back to OCR + Text LLM. Error: {error_msg}")
+                # Fallback: Extract Text w/ EasyOCR -> Feed to LLM
+                extracted_text = self.process_easyocr(image_bytes)
+                
+                # New Text-Only Prompt
+                new_prompt = f"{prompt}\n\n[CONTEXT from OCR extraction]:\n{extracted_text}"
+                
+                response = client.chat.completions.create(
+                    model=model,
+                    extra_headers=extra_headers,
+                    temperature=temperature,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": new_prompt}
                     ],
-                }
-            ],
-            max_tokens=max_tokens,
-        )
-        return response.choices[0].message.content
+                    max_tokens=max_tokens,
+                )
+                return f"[Note: Vision failed, auto-switched to OCR + LLM]\n\n{response.choices[0].message.content}"
+            else:
+                 raise e
 
     def process_tesseract(self, image_bytes: bytes) -> str:
         if not pytesseract:
@@ -179,21 +204,44 @@ class OCREngine:
             return f"Error processing with Tesseract: {str(e)}"
 
     def process_easyocr(self, image_bytes: bytes) -> str:
-        # EasyOCR runs in python, no external exe (besides what pip installed)
-        # It handles torch download.
+        # EasyOCR runs in python
         global easyocr_reader
         try:
             import easyocr
             import numpy as np
-        except ImportError:
-            return "Error: easyocr module not found. Please pip install easyocr."
+            # pdf2image determines if we can read PDFs
+            from pdf2image import convert_from_bytes
+            from pdf2image.exceptions import PDFInfoNotInstalledError
+        except ImportError as e:
+            return f"Error: Missing dependency. Please ensure easyocr, numpy, and pdf2image are installed. {str(e)}"
             
         try:
             if easyocr_reader is None:
-                # Initialize for English by default. CPU is default unless gpu=True
-                # Using gpu=False for better compatibility if user lacks CUDA setup
                 easyocr_reader = easyocr.Reader(['en'], gpu=False)
-                
+            
+            # Check if PDF
+            if image_bytes.startswith(b"%PDF"):
+                try:
+                    # Convert PDF pages to images
+                    # Note: This requires Poppler to be installed on the system
+                    images = convert_from_bytes(image_bytes)
+                    
+                    full_text = []
+                    for i, img in enumerate(images):
+                        img_np = np.array(img)
+                        results = easyocr_reader.readtext(img_np)
+                        page_text = "\n".join([res[1] for res in results])
+                        full_text.append(f"--- Page {i+1} ---\n{page_text}")
+                    
+                    text_out = "\n\n".join(full_text)
+                    return text_out if text_out.strip() else "No text found in PDF by EasyOCR."
+                    
+                except PDFInfoNotInstalledError:
+                    return "Error: To process PDFs locally, 'Poppler' must be installed and added to PATH. Please install it or upload an image (JPG/PNG) instead."
+                except Exception as e:
+                    return f"Error processing PDF: {str(e)}"
+
+            # Normal Image
             img = Image.open(BytesIO(image_bytes))
             # Convert to numpy array
             img_np = np.array(img)

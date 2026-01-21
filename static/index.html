@@ -34,14 +34,53 @@
                 <button class="settings-btn" onclick="clearHistory()" style="color: #ff4444; margin-bottom: 0.5rem;">
                     <i class="fa-solid fa-trash"></i> Clear History
                 </button>
-                <button class="settings-btn" onclick="toggleSettings()">
+                <button class="settings-btn" onclick="toggleSettings()" style="margin-bottom: 0.5rem;">
                     <i class="fa-solid fa-gear"></i> Settings
+                </button>
+                <button class="settings-btn" onclick="toggleCredits()">
+                    <i class="fa-solid fa-code"></i> Credits
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Credits Modal -->
+            <div class="settings-panel hidden" id="creditsPanel" style="text-align: center;">
+                <div class="settings-header">
+                    <h3>Credits</h3>
+                    <button onclick="toggleCredits()" class="close-settings-btn"><i
+                            class="fa-solid fa-times"></i></button>
+                </div>
+                <div style="padding: 1rem 0;">
+                    <div
+                        style="width: 80px; height: 80px; background: var(--accent); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: black; font-weight: bold;">
+                        R
+                    </div>
+                    <h2 style="margin-bottom: 0.5rem; color: var(--accent);">Ruturaj Sharbidre</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">QA Automation Engineer & AI
+                        Enthusiast
+                    </p>
+
+                    <div style="display: flex; justify-content: center; gap: 1rem;">
+                        <a href="https://github.com/RuturajS" target="_blank"
+                            style="color: var(--text-primary); font-size: 1.5rem; transition: color 0.2s;"><i
+                                class="fa-brands fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/ruturajsharbidre" target="_blank"
+                            style="color: var(--text-primary); font-size: 1.5rem; transition: color 0.2s;"><i
+                                class="fa-brands fa-linkedin"></i></a>
+                        <a href="https://twitter.com/Ruturaj_04" target="_blank"
+                            style="color: var(--text-primary); font-size: 1.5rem; transition: color 0.2s;"><i
+                                class="fa-brands fa-twitter"></i></a>
+                    </div>
+
+                    <div
+                        style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-secondary);">
+                        <p>Built with ❤️ using OpenAI, Gemini & EasyOCR</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Modal -->
             <div class="settings-panel hidden" id="settingsPanel">
                 <div class="settings-header">

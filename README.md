@@ -2,115 +2,77 @@
 
 > A powerful, accessible AI-powered OCR tool using OpenAI and Gemini Vision APIs. No local model installation needed!
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.11-blue)
-![Docker](https://img.shields.io/badge/docker-ready-green)
-
-## Project Concept
-**Smart OCR with AI Context Extraction**  
-A web-based and CLI tool for extracting structured data from images and PDFs using state-of-the-art multimodal LLMs. Perfect for QA testers, data entry automation, and verifying UI elements.
-
 ## Features ✅
 
-- **No Local Installation**: Powered by Cloud APIs (OpenAI & Google Gemini).
-- **Context-Aware**: Ask specifically for tables, forms, or specific text fields.
-- **Web Interface**: Modern, dark-mode UI with drag-and-drop.
-- **Multi-Format**: Supports PNG, JPG, PDF.
+- **Choice of Provider**: OpenAI (GPT-4o), Google Gemini, or Local (EasyOCR/Tesseract).
+- **Context-Aware**: Ask specifically for tables, forms, or data extraction.
+- **Web Interface**: Clean, dark-mode UI with drag-and-drop.
 - **CLI Support**: Automate workflows via command line.
-- **History**: Tracks past extractions.
-- **Dockerized**: easy deployment.
+- **Privacy-First**: Local OCR options available.
 
 ## Quick Start
 
 ### Prerequisites
-- Python 3.9+ OR Docker
-- API Key from [OpenAI](https://platform.openai.com) or [Google Gemini](https://aistudio.google.com).
+- **Node.js** (v14+)
+- **Python** (3.9+)
+- API Key from [OpenAI](https://platform.openai.com) or [Google Gemini](https://aistudio.google.com) (Optional if using local OCR).
 
-### Running Locally (Python)
+### Installation
 
-1. **Clone & Install**
+1. **Clone & Install Dependencies**
    ```bash
    git clone https://github.com/RuturajS/AI-LLM-OCR.git
    cd AI-LLM-OCR
+   
+   # Install Web Backend Dependencies
+   npm install
+   
+   # Install Python Worker Dependencies (for Local OCR & CLI)
    pip install -r requirements.txt
    ```
 
-2. **Run Server**
-   ```bash
-   uvicorn backend.main:app --reload
+2. **Setup Environment**
+   Create a `.env` file in the root directory:
+   ```env
+   OPENAI_API_KEY=sk-...
+   GEMINI_API_KEY=AIza...
    ```
-   Open [http://localhost:8000](http://localhost:8000) in your browser.
 
-### Running with Docker 🐳
+### Usage
 
+#### 1. Web Interface 🌐
+Run the web server:
 ```bash
-docker build -t ai-smart-ocr .
-docker run -p 8000:8000 --env OPENAI_API_KEY=your_key ai-smart-ocr
+npm start
 ```
+Open [http://localhost:8000](http://localhost:8000) in your browser.
 
-### CLI Usage 💻
-
+#### 2. CLI Tool 💻
 Extract text directly from your terminal:
-
 ```bash
 # Basic Extraction
 python cli.py extract image.png
 
-# Custom Prompt
-python cli.py extract invoice.pdf --prompt "Extract total amount and date as JSON"
-
-# Use Gemini
-python cli.py extract screenshot.png --provider gemini --key "AIza..."
-
-# View History
-python cli.py history
+# Custom Prompt with Gemini
+python cli.py extract invoice.pdf --provider gemini --prompt "Extract total amount"
 ```
 
-## Configuration
-
-You can set API keys in the Web UI settings or via environment variables:
-
-- `OPENAI_API_KEY`
-- `GEMINI_API_KEY`
-- `OPENROUTER_API_KEY`
-
-- `OPENROUTER_API_KEY`
-
-### Local OCR Options (No API Key Required)
+### Local OCR Options (No API Costs)
 
 #### 1. EasyOCR (Recommended for Local)
-Select "EasyOCR" in the dropdown. It runs entirely on your CPU/GPU using Python. **No extra installation needed** (dependency installed via requirements).
+Select "EasyOCR" in the dropdown. It runs entirely on your CPU/GPU using Python. **No extra installation needed** for images.
 
-#### 2. Tesseract
-To use Tesseract:
-1.  **Option A (System Install)**: Install it to a standard path like `C:\Program Files\Tesseract-OCR`.
-2.  **Option B (Portable/Custom)**: Set the `TESSERACT_PATH` environment variable in your `.env` file to point to your `tesseract.exe`.
-    ```bash
-    TESSERACT_PATH=C:\path\to\portable\tesseract.exe
-    ```
-
-## Use Cases 💡
-
-1. **QA Testing**: Validate error messages in screenshots.
-   *Prompt: "Extract all error messages and their color codes."*
-   
-2. **Data Entry**: Convert invoice photos to JSON.
-   *Prompt: "Extract vendor, date, and total amount in JSON format."*
-   
-3. **Accessibility**: Get image descriptions.
-   *Prompt: "Describe the UI layout for a screen reader."*
+**For PDF Support (Windows Only):**
+You must install **Poppler** to process PDFs locally:
+1. Download the latest release from [Poppler for Windows](https://github.com/oschwartz10612/poppler-windows/releases/).
+2. Extract the zip file (e.g., to `C:\Program Files\Poppler`).
+3. Add the `bin` folder to your System PATH or create a `.env` variable:
+   ```env
+   POPPLER_PATH=C:\Program Files\Poppler\Library\bin
+   ```
 
 ## Contributing 🤝
-
-We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) to get started.
-
-1. **Fork the repo** and create a concise branch name.
-2. **Code Style**: Ensure Python code is typed and formatted.
-3. **Commit Messages**: Use conventional commits (e.g., `feat: add new provider`).
-4. **Pull Request**: Describe your changes clearly.
-
-### Tags
-#OCR #AI #OpenAI #Gemini #Python #FastAPI #Docker #Automation
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
-**Maintainer**: Ruturaj
+**Maintained by**: Ruturaj
