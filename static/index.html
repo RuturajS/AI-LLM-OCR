@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart OCR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-eye"></i>
+                <span>Smart OCR</span>
+            </div>
+            <button class="new-chat-btn" onclick="resetApp()">
+                <i class="fa-solid fa-plus"></i> New Extraction
+            </button>
+            <div class="history-list" id="historyList">
+                <!-- History Items will go here -->
+            </div>
+            <div class="sidebar-footer">
+                <button class="settings-btn" onclick="toggleSettings()">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Settings Modal (Inline for simplicity or overlay) -->
+            <div class="settings-panel hidden" id="settingsPanel">
+                <h3>API Configuration</h3>
+                <div class="form-group">
+                    <label>OpenAI API Key</label>
+                    <input type="password" id="openaiKey" placeholder="sk-...">
+                </div>
+                <div class="form-group">
+                    <label>Gemini API Key</label>
+                    <input type="password" id="geminiKey" placeholder="AIza...">
+                </div>
+                <button onclick="saveSettings()" class="save-btn">Save Keys</button>
+            </div>
+
+            <!-- Workspace -->
+            <div class="workspace" id="workspace">
+                 <div class="upload-section" id="uploadSection">
+                    <div class="dropzone" id="dropzone">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Drag & Drop Image/PDF</h3>
+                        <p>or click to browse</p>
+                        <input type="file" id="fileInput" accept="image/*,application/pdf" hidden>
+                    </div>
+                </div>
+
+                <div class="preview-section hidden" id="previewSection">
+                    <div class="image-preview-container">
+                        <img id="imagePreview" src="" alt="Preview">
+                        <div class="file-info" id="fileInfo"></div>
+                    </div>
+                    
+                    <div class="controls-container">
+                        <div class="prompt-box">
+                            <label>Instruction / Prompt</label>
+                            <textarea id="promptInput" placeholder="e.g. Extract only the total amount and date from this invoice."></textarea>
+                        </div>
+                        
+                        <div class="options-row">
+                            <select id="providerSelect">
+                                <option value="openai">OpenAI (GPT-4o)</option>
+                                <option value="gemini">Google Gemini (Flash)</option>
+                            </select>
+                            <button class="extract-btn" onclick="processExtraction()" id="extractBtn">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Extract Text
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section hidden" id="resultSection">
+                    <div class="result-header">
+                        <h3>Extraction Result</h3>
+                        <div class="actions">
+                            <button onclick="copyResult()"><i class="fa-regular fa-copy"></i> Copy</button>
+                            <button onclick="downloadResult()"><i class="fa-solid fa-download"></i> JSON</button>
+                        </div>
+                    </div>
+                    <div class="result-content" id="resultContent"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
